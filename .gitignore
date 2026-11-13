@@ -1,0 +1,23 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local application data and configuration
+data/
+.env*
+*.local
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.log
+
+# Machine and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Historical screenshot retained locally
+/studio/docs/cms-preview.png

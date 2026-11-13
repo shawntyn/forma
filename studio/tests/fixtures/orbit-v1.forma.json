@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "name": "Orbit · 产品展示页",
+  "theme": {
+    "mode": "light",
+    "preset": "violet",
+    "tokens": {
+      "background": "#ffffff",
+      "foreground": "#242329",
+      "card": "#ffffff",
+      "card-foreground": "#242329",
+      "popover": "#ffffff",
+      "popover-foreground": "#242329",
+      "primary": "#7655d9",
+      "primary-foreground": "#ffffff",
+      "secondary": "#f0edf8",
+      "secondary-foreground": "#554582",
+      "muted": "#f7f6f9",
+      "muted-foreground": "#77737f",
+      "accent": "#f0edf8",
+      "accent-foreground": "#554582",
+      "destructive": "#dc2626",
+      "border": "#e9e6ef",
+      "input": "#e9e6ef",
+      "ring": "#7655d9",
+      "chart-1": "#7655d9",
+      "chart-2": "#188767",
+      "chart-3": "#3268da",
+      "chart-4": "#c95a26",
+      "chart-5": "#c63e7d",
+      "sidebar": "#faf9fc",
+      "sidebar-foreground": "#242329",
+      "sidebar-primary": "#7655d9",
+      "sidebar-primary-foreground": "#ffffff",
+      "sidebar-accent": "#f0edf8",
+      "sidebar-accent-foreground": "#554582",
+      "sidebar-border": "#e9e6ef",
+      "sidebar-ring": "#7655d9",
+      "radius": "0.75rem"
+    }
+  },
+  "spec": {
+    "root": "page",
+    "elements": {
+      "page": {
+        "type": "Page",
+        "props": {},
+        "children": [
+          "navigation",
+          "hero",
+          "features",
+          "footer"
+        ]
+      },
+      "navigation": {
+        "type": "Navigation",
+        "props": {
+          "brand": "Orbit",
+          "links": "产品,灵感,关于我们",
+          "action": "开始探索"
+        }
+      },
+      "hero": {
+        "type": "Section",
+        "props": {
+          "kind": "hero",
+          "align": "center"
+        },
+        "children": [
+          "hero-badge",
+          "hero-heading",
+          "hero-description",
+          "hero-actions",
+          "hero-caption"
+        ]
+      },
+      "hero-badge": {
+        "type": "Badge",
+        "props": {
+          "label": "✦  为每一个好想法而造",
+          "variant": "secondary"
+        }
+      },
+      "hero-heading": {
+        "type": "Heading",
+        "props": {
+          "text": "把想法，变成\n下一件作品。",
+          "level": "h1"
+        }
+      },
+      "hero-description": {
+        "type": "Text",
+        "props": {
+          "text": "一个让创意自然发生的空间。\n从第一个灵感，到每一个精心打磨的细节。",
+          "tone": "muted"
+        }
+      },
+      "hero-actions": {
+        "type": "Stack",
+        "props": {
+          "direction": "row",
+          "align": "center"
+        },
+        "children": [
+          "hero-primary",
+          "hero-secondary"
+        ]
+      },
+      "hero-primary": {
+        "type": "Button",
+        "props": {
+          "label": "开始你的创作  ↗",
+          "variant": "default",
+          "href": "#features"
+        }
+      },
+      "hero-secondary": {
+        "type": "Button",
+        "props": {
+          "label": "探索更多可能",
+          "variant": "outline",
+          "href": "#features"
+        }
+      },
+      "hero-caption": {
+        "type": "Text",
+        "props": {
+          "text": "自由组合 · 一致设计 · 即刻呈现",
+          "tone": "muted"
+        }
+      },
+      "features": {
+        "type": "Section",
+        "props": {
+          "kind": "content",
+          "align": "center"
+        },
+        "children": [
+          "features-heading",
+          "features-description",
+          "feature-grid"
+        ]
+      },
+      "features-heading": {
+        "type": "Heading",
+        "props": {
+          "text": "少一点繁琐，多一点创造。",
+          "level": "h2"
+        }
+      },
+      "features-description": {
+        "type": "Text",
+        "props": {
+          "text": "把注意力留给真正重要的事，其他的交给 Orbit。",
+          "tone": "muted"
+        }
+      },
+      "feature-grid": {
+        "type": "Stack",
+        "props": {
+          "direction": "grid",
+          "align": "start"
+        },
+        "children": [
+          "feature-compose",
+          "feature-theme",
+          "feature-ship"
+        ]
+      },
+      "feature-compose": {
+        "type": "Card",
+        "props": {
+          "title": "从组合开始",
+          "description": "像搭积木一样组织页面，让灵感顺着你的节奏落地。",
+          "icon": "layers"
+        },
+        "children": []
+      },
+      "feature-theme": {
+        "type": "Card",
+        "props": {
+          "title": "每一处，都恰到好处",
+          "description": "一套设计语言贯穿始终，让细节自然保持一致。",
+          "icon": "sliders"
+        },
+        "children": []
+      },
+      "feature-ship": {
+        "type": "Card",
+        "props": {
+          "title": "好作品，不必等待",
+          "description": "所见即所得。从想法到呈现，让创造更进一步。",
+          "icon": "zap"
+        },
+        "children": []
+      },
+      "footer": {
+        "type": "Section",
+        "props": {
+          "kind": "cta",
+          "align": "center"
+        },
+        "children": [
+          "footer-separator",
+          "footer-text"
+        ]
+      },
+      "footer-separator": {
+        "type": "Separator",
+        "props": {}
+      },
+      "footer-text": {
+        "type": "Text",
+        "props": {
+          "text": "Orbit®   ·   为创造而生。",
+          "tone": "muted"
+        }
+      }
+    }
+  }
+}
