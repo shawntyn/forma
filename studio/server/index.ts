@@ -18,7 +18,10 @@ let stopping = false;
 function stop() {
   if (stopping) return;
   stopping = true;
-  void server.stop().then(() => { app.close(); process.exit(0); });
+  void server.stop().then(() => {
+    app.close();
+    process.exit(0);
+  });
 }
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);

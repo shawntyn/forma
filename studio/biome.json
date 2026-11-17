@@ -1,0 +1,54 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.8/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.css",
+      "**/*.json",
+      "!!dist",
+      "!!node_modules",
+      "!!data",
+      "!!examples",
+      "!!tests/fixtures",
+      "!!src/style-tokens.css"
+    ]
+  },
+  "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
+  "javascript": {
+    "formatter": { "quoteStyle": "single", "semicolons": "always" }
+  },
+  "css": { "parser": { "tailwindDirectives": true } },
+  "tailwind": {
+    "stylesheet": "./src/index.css",
+    "mergeFunctions": ["cn", "clsx", "twMerge"],
+    "attributes": ["class", "className"]
+  },
+  "linter": {
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        "useImportType": "error",
+        "noDescendingSpecificity": "off",
+        "noNonNullAssertion": "off"
+      },
+      "complexity": { "noImportantStyles": "off" },
+      "nursery": {
+        "noTailwindRawColors": {
+          "level": "error",
+          "options": { "allowBlackAndWhite": false }
+        },
+        "noTailwindArbitraryValue": "error",
+        "useTailwindStaticClassStrings": "error",
+        "noTailwindRestrictedClasses": {
+          "level": "error",
+          "options": {
+            "classes": { "opacity-*": "Use an approved component state token." },
+            "variants": { "[*]": "Use a registered state or responsive variant." }
+          }
+        }
+      }
+    }
+  }
+}

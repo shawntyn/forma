@@ -4,9 +4,15 @@ import { createInitialDocument, parseDocument, STORAGE_KEY, type DesignDocument 
 function loadDocument(): { document: DesignDocument; warning: string } {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return { document: saved ? parseDocument(JSON.parse(saved)) : createInitialDocument(), warning: '' };
+    return {
+      document: saved ? parseDocument(JSON.parse(saved)) : createInitialDocument(),
+      warning: '',
+    };
   } catch {
-    return { document: createInitialDocument(), warning: '本地草稿无法读取，已载入示例。原始草稿保留在浏览器中，首次编辑后才会更新。' };
+    return {
+      document: createInitialDocument(),
+      warning: '本地草稿无法读取，已载入示例。原始草稿保留在浏览器中，首次编辑后才会更新。',
+    };
   }
 }
 export interface DocumentOptions {
@@ -18,9 +24,11 @@ export function useDocument(options: DocumentOptions = {}) {
   const persist = options.persist ?? true;
   const onChange = useRef(options.onChange);
   onChange.current = options.onChange;
-  const [initial] = useState(() => options.initialDocument
-    ? { document: parseDocument(options.initialDocument), warning: '' }
-    : loadDocument());
+  const [initial] = useState(() =>
+    options.initialDocument
+      ? { document: parseDocument(options.initialDocument), warning: '' }
+      : loadDocument(),
+  );
   const [document, setDocument] = useState(initial.document);
   const current = useRef(document);
   const past = useRef<DesignDocument[]>([]);
@@ -36,7 +44,7 @@ export function useDocument(options: DocumentOptions = {}) {
     future.current = [];
     current.current = result;
     setDocument(result);
-    setRevision(n => n + 1);
+    setRevision((n) => n + 1);
     setSaveStatus('saving');
     dirty.current = true;
     onChange.current?.(result);
@@ -47,7 +55,7 @@ export function useDocument(options: DocumentOptions = {}) {
     future.current.push(current.current);
     current.current = previous;
     setDocument(previous);
-    setRevision(n => n + 1);
+    setRevision((n) => n + 1);
     setSaveStatus('saving');
     dirty.current = true;
     onChange.current?.(previous);
@@ -58,7 +66,7 @@ export function useDocument(options: DocumentOptions = {}) {
     past.current.push(current.current);
     current.current = next;
     setDocument(next);
-    setRevision(n => n + 1);
+    setRevision((n) => n + 1);
     setSaveStatus('saving');
     dirty.current = true;
     onChange.current?.(next);
@@ -66,17 +74,42 @@ export function useDocument(options: DocumentOptions = {}) {
   useEffect(() => {
     if (revision === 0 || !persist) return;
     const timeout = setTimeout(() => {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(document)); setSaveStatus('saved'); }
-      catch { setSaveStatus('error'); }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(document));
+        setSaveStatus('saved');
+      } catch {
+        setSaveStatus('error');
+      }
     }, 400);
     return () => clearTimeout(timeout);
   }, [document, revision, persist]);
   useEffect(() => {
     if (!persist) return;
-    const flush = () => { if (dirty.current) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(current.current)); } catch { /* normal save effect displays failure */ } } };
+    const flush = () => {
+      if (dirty.current) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(current.current));
+        } catch {
+          /* normal save effect displays failure */
+        }
+      }
+    };
     window.addEventListener('pagehide', flush);
     window.document.addEventListener('visibilitychange', flush);
-    return () => { flush(); window.removeEventListener('pagehide', flush); window.document.removeEventListener('visibilitychange', flush); };
+    return () => {
+      flush();
+      window.removeEventListener('pagehide', flush);
+      window.document.removeEventListener('visibilitychange', flush);
+    };
   }, [persist]);
-  return { document, commit, undo, redo, canUndo: past.current.length > 0, canRedo: future.current.length > 0, saveStatus, warning };
+  return {
+    document,
+    commit,
+    undo,
+    redo,
+    canUndo: past.current.length > 0,
+    canRedo: future.current.length > 0,
+    saveStatus,
+    warning,
+  };
 }

@@ -11,7 +11,9 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return <div data-ui="card-title" className={cn('ds-card-title', className)} {...props} />;
 }
 function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-ui="card-description" className={cn('ds-card-description', className)} {...props} />;
+  return (
+    <div data-ui="card-description" className={cn('ds-card-description', className)} {...props} />
+  );
 }
 function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
   return <div data-ui="card-action" className={cn('ds-card-action', className)} {...props} />;

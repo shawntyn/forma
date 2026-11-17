@@ -15,16 +15,20 @@ afterEach(() => {
 
 function ExportDialogExample() {
   const [isOpen, setIsOpen] = useState(false);
-  return <>
-    <button type="button" onClick={() => setIsOpen(true)}>打开导出</button>
-    <Dialog isOpen={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
-        <DialogTitle>导出设计项目</DialogTitle>
-        <DialogDescription>下载页面结构与全局主题。</DialogDescription>
-        <Button onPress={() => setIsOpen(false)}>完成</Button>
-      </DialogContent>
-    </Dialog>
-  </>;
+  return (
+    <>
+      <button type="button" onClick={() => setIsOpen(true)}>
+        打开导出
+      </button>
+      <Dialog isOpen={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogTitle>导出设计项目</DialogTitle>
+          <DialogDescription>下载页面结构与全局主题。</DialogDescription>
+          <Button onPress={() => setIsOpen(false)}>完成</Button>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
 
 describe('React Aria UI interactions', () => {
@@ -32,7 +36,14 @@ describe('React Aria UI interactions', () => {
     const user = userEvent.setup({ document });
     const onPress = mock(() => {});
     const onDisabledPress = mock(() => {});
-    render(<><Button onPress={onPress}>添加组件</Button><Button isDisabled onPress={onDisabledPress}>不可用操作</Button></>);
+    render(
+      <>
+        <Button onPress={onPress}>添加组件</Button>
+        <Button isDisabled onPress={onDisabledPress}>
+          不可用操作
+        </Button>
+      </>,
+    );
 
     await user.tab();
     expect(document.activeElement === screen.getByRole('button', { name: '添加组件' })).toBe(true);
@@ -50,7 +61,10 @@ describe('React Aria UI interactions', () => {
     render(<ExportDialogExample />);
     const opener = screen.getByRole('button', { name: '打开导出' });
     await user.click(opener);
-    const dialog = await screen.findByRole('dialog', { name: '导出设计项目', description: '下载页面结构与全局主题。' });
+    const dialog = await screen.findByRole('dialog', {
+      name: '导出设计项目',
+      description: '下载页面结构与全局主题。',
+    });
     await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
     await user.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
@@ -88,7 +102,9 @@ describe('json-render canvas integration', () => {
     const user = userEvent.setup({ document });
     const doc = createInitialDocument();
     const onSelect = mock((_id: string) => {});
-    render(<CanvasRenderer spec={doc.spec} selectedId={null} preview={false} onSelect={onSelect} />);
+    render(
+      <CanvasRenderer spec={doc.spec} selectedId={null} preview={false} onSelect={onSelect} />,
+    );
     const link = screen.getByRole('link', { name: /开始你的创作/ });
     await user.click(link);
     expect(onSelect).toHaveBeenCalledWith('hero-primary');
@@ -121,14 +137,29 @@ describe('json-render canvas integration', () => {
     const doc = parseDocument(JSON.parse(JSON.stringify(createInitialDocument())));
     const original = JSON.stringify(doc);
     const noop = () => {};
-    const view = (primary: string) => <div data-testid="theme-scope" style={themeToStyle(setTokenValue(doc.theme, 'semantic.color.action', hexToColor(primary))) as CSSProperties}>
-      <CanvasRenderer spec={doc.spec} selectedId={null} preview onSelect={noop} />
-    </div>;
+    const view = (primary: string) => (
+      <div
+        data-testid="theme-scope"
+        style={
+          themeToStyle(
+            setTokenValue(doc.theme, 'semantic.color.action', hexToColor(primary)),
+          ) as CSSProperties
+        }
+      >
+        <CanvasRenderer spec={doc.spec} selectedId={null} preview onSelect={noop} />
+      </div>
+    );
     const { rerender } = render(view('#7655d9'));
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('把想法，变成\n下一件作品。');
-    expect(screen.getByTestId('theme-scope').style.getPropertyValue('--ds-semantic-color-action')).toBe('#7655d9');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(
+      '把想法，变成\n下一件作品。',
+    );
+    expect(
+      screen.getByTestId('theme-scope').style.getPropertyValue('--ds-semantic-color-action'),
+    ).toBe('#7655d9');
     rerender(view('#188767'));
-    expect(screen.getByTestId('theme-scope').style.getPropertyValue('--ds-semantic-color-action')).toBe('#188767');
+    expect(
+      screen.getByTestId('theme-scope').style.getPropertyValue('--ds-semantic-color-action'),
+    ).toBe('#188767');
     expect(JSON.stringify(doc)).toBe(original);
     for (const element of Object.values(doc.spec.elements)) {
       expect(Object.hasOwn(element.props, 'style')).toBe(false);

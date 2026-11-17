@@ -1,5 +1,18 @@
 import { describe, expect, test } from 'bun:test';
-import { STORAGE_KEY, componentDefinitions, createInitialDocument, duplicateElement, findParent, getDescendants, insertElement, moveElement, parseDocument, removeElement, serializeDocument, updateElementProps } from './document';
+import {
+  STORAGE_KEY,
+  componentDefinitions,
+  createInitialDocument,
+  duplicateElement,
+  findParent,
+  getDescendants,
+  insertElement,
+  moveElement,
+  parseDocument,
+  removeElement,
+  serializeDocument,
+  updateElementProps,
+} from './document';
 import { createTheme, getTokenValue, parseTheme, themeToCSS, themeToStyle } from './tokens';
 import legacyOrbit from '../../tests/fixtures/orbit-v1.forma.json';
 
@@ -20,7 +33,11 @@ describe('document integrity and editing', () => {
   test('moves across parents and respects before-removal gap indices within a parent', () => {
     const document = createInitialDocument();
     const moved = moveElement(document, 'hero-badge', 'hero', 3);
-    expect(moved.spec.elements.hero.children?.slice(0, 3)).toEqual(['hero-heading', 'hero-description', 'hero-badge']);
+    expect(moved.spec.elements.hero.children?.slice(0, 3)).toEqual([
+      'hero-heading',
+      'hero-description',
+      'hero-badge',
+    ]);
     const nested = moveElement(moved, 'hero-badge', 'feature-compose', 0);
     expect(findParent(nested.spec, 'hero-badge')).toBe('feature-compose');
     expect(nested.spec.elements.hero.children).not.toContain('hero-badge');
@@ -39,7 +56,9 @@ describe('document integrity and editing', () => {
     const children = cloned.document.spec.elements[cloned.id].children!;
     expect(children).toHaveLength(2);
     expect(children).not.toContain('hero-primary');
-    expect(cloned.document.spec.elements[children[0]].props).toEqual(document.spec.elements['hero-primary'].props);
+    expect(cloned.document.spec.elements[children[0]].props).toEqual(
+      document.spec.elements['hero-primary'].props,
+    );
     const edited = updateElementProps(cloned.document, children[0], { label: 'A new action' });
     expect(edited.spec.elements['hero-primary'].props.label).toBe('开始你的创作  ↗');
   });
@@ -56,15 +75,21 @@ describe('document integrity and editing', () => {
 describe('import boundaries', () => {
   test('rejects instance-level visual overrides at both element and props level', () => {
     const document = createInitialDocument();
-    expect(() => updateElementProps(document, 'hero-heading', { style: { color: 'red' } })).toThrow('tokens');
-    expect(() => updateElementProps(document, 'hero-primary', { className: 'rounded-none' })).toThrow('tokens');
+    expect(() => updateElementProps(document, 'hero-heading', { style: { color: 'red' } })).toThrow(
+      'tokens',
+    );
+    expect(() =>
+      updateElementProps(document, 'hero-primary', { className: 'rounded-none' }),
+    ).toThrow('tokens');
     const injected = JSON.parse(serializeDocument(document));
     injected.spec.elements.hero.style = { background: 'red' };
     expect(() => parseDocument(injected)).toThrow('格式无效');
   });
   test('rejects scripting links and unregistered components', () => {
     const document = createInitialDocument();
-    expect(() => updateElementProps(document, 'hero-primary', { href: 'javascript:alert(1)' })).toThrow();
+    expect(() =>
+      updateElementProps(document, 'hero-primary', { href: 'javascript:alert(1)' }),
+    ).toThrow();
     const injected = JSON.parse(serializeDocument(document));
     injected.spec.elements['hero-heading'].type = 'script';
     expect(() => parseDocument(injected)).toThrow();
@@ -88,7 +113,11 @@ describe('import boundaries', () => {
     let parent = 'hero';
     for (let i = 0; i < 34; i++) {
       const id = `nest_${i}`;
-      document.spec.elements[id] = { type: 'Stack', props: { direction: 'column', align: 'start' }, children: [] };
+      document.spec.elements[id] = {
+        type: 'Stack',
+        props: { direction: 'column', align: 'start' },
+        children: [],
+      };
       document.spec.elements[parent].children!.push(id);
       parent = id;
     }
@@ -99,7 +128,8 @@ describe('import boundaries', () => {
     injected.theme.tokens['font-family'] = 'custom';
     expect(() => parseDocument(injected)).toThrow();
     delete injected.theme.tokens['font-family'];
-    injected.theme.tokens.semantic.color.action.$value = 'red; background: url(https://example.com)';
+    injected.theme.tokens.semantic.color.action.$value =
+      'red; background: url(https://example.com)';
     expect(() => parseDocument(injected)).toThrow();
     const invalidRadius = JSON.parse(serializeDocument(createInitialDocument()));
     invalidRadius.theme.tokens.semantic.radius.control.$value = { value: 9, unit: 'rem' };
@@ -120,23 +150,38 @@ describe('React Aria migration preserves the JSON boundary', () => {
     ['onPress', { $function: '() => document.body.remove()' }],
   ];
 
-  test.each(deniedProps)('rejects primitive escape hatch %s on every catalog component', (key, value) => {
-    for (const definition of componentDefinitions) {
-      const document = createInitialDocument();
-      const subject = definition.type === 'Page' ? document.spec.root : 'subject';
-      document.spec.elements = {
-        [document.spec.root]: { type: 'Page', props: {}, children: subject === document.spec.root ? [] : [subject] },
-        ...(subject === document.spec.root ? {} : { [subject]: { type: definition.type, props: definition.defaultProps } }),
-      };
-      document.spec.elements[subject].props = { ...document.spec.elements[subject].props, [key]: value };
-      // Exercise the real serialized import path, not just an isolated schema.
-      expect(() => parseDocument(JSON.stringify(document))).toThrow('tokens');
-    }
-  });
+  test.each(deniedProps)(
+    'rejects primitive escape hatch %s on every catalog component',
+    (key, value) => {
+      for (const definition of componentDefinitions) {
+        const document = createInitialDocument();
+        const subject = definition.type === 'Page' ? document.spec.root : 'subject';
+        document.spec.elements = {
+          [document.spec.root]: {
+            type: 'Page',
+            props: {},
+            children: subject === document.spec.root ? [] : [subject],
+          },
+          ...(subject === document.spec.root
+            ? {}
+            : { [subject]: { type: definition.type, props: definition.defaultProps } }),
+        };
+        document.spec.elements[subject].props = {
+          ...document.spec.elements[subject].props,
+          [key]: value,
+        };
+        // Exercise the real serialized import path, not just an isolated schema.
+        expect(() => parseDocument(JSON.stringify(document))).toThrow('tokens');
+      }
+    },
+  );
 
   test('rejects serialized render props and expressions in otherwise allowed content fields', () => {
     const document = createInitialDocument();
-    for (const value of [{ $function: '({isHovered}) => "hovered"' }, { $state: '/customStyles' }]) {
+    for (const value of [
+      { $function: '({isHovered}) => "hovered"' },
+      { $state: '/customStyles' },
+    ]) {
       document.spec.elements['hero-primary'].props.label = value;
       expect(() => parseDocument(JSON.stringify(document))).toThrow('tokens');
     }
@@ -150,7 +195,14 @@ describe('React Aria migration preserves the JSON boundary', () => {
       injected.spec.elements['hero-primary'][key] = value;
       expect(() => parseDocument(JSON.stringify(injected))).toThrow('格式无效');
     }
-    for (const token of ['--ds-semantic-color-action', 'customColor', 'hover-action', 'pressed-action', 'UNSAFE_style', 'font-family']) {
+    for (const token of [
+      '--ds-semantic-color-action',
+      'customColor',
+      'hover-action',
+      'pressed-action',
+      'UNSAFE_style',
+      'font-family',
+    ]) {
       const injected = structuredClone(raw);
       injected.theme.tokens[token] = '#ff0000';
       expect(() => parseDocument(JSON.stringify(injected))).toThrow('格式无效');
@@ -181,8 +233,14 @@ describe('React Aria migration preserves the JSON boundary', () => {
     expect<unknown>(restored.spec).toEqual(original.spec);
     expect(restored.theme).toEqual(parseTheme(original.theme));
     expect(restored.theme.version).toBe(2);
-    expect(getTokenValue(restored.theme, 'semantic.color.action')).toMatchObject({ colorSpace: 'srgb', components: [0x12 / 255, 0x34 / 255, 0x56 / 255] });
-    expect(getTokenValue(restored.theme, 'semantic.radius.surface')).toEqual({ value: 1.25, unit: 'rem' });
+    expect(getTokenValue(restored.theme, 'semantic.color.action')).toMatchObject({
+      colorSpace: 'srgb',
+      components: [0x12 / 255, 0x34 / 255, 0x56 / 255],
+    });
+    expect(getTokenValue(restored.theme, 'semantic.radius.surface')).toEqual({
+      value: 1.25,
+      unit: 'rem',
+    });
     expect(parseDocument(serializeDocument(restored))).toEqual(restored);
     expect(JSON.stringify(original)).toBe(snapshot);
     expect(STORAGE_KEY).toBe('forma-studio-document-v1');
@@ -192,7 +250,9 @@ describe('React Aria migration preserves the JSON boundary', () => {
     const legacy = structuredClone(legacyOrbit);
     expect(() => parseDocument({ ...legacy, version: 2 })).toThrow('格式无效');
     expect(() => parseDocument({ ...legacy, version: 3 })).toThrow('格式无效');
-    expect(() => parseDocument({ ...legacy, theme: { ...legacy.theme, css: 'body { color: red }' } })).toThrow('格式无效');
+    expect(() =>
+      parseDocument({ ...legacy, theme: { ...legacy.theme, css: 'body { color: red }' } }),
+    ).toThrow('格式无效');
     legacy.theme.tokens.primary = 'url(https://example.test/style)';
     expect(() => parseDocument(legacy)).toThrow('格式无效');
     const styled = structuredClone(legacyOrbit);

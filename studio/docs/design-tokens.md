@@ -170,6 +170,46 @@ CSS 名称只把点替换为连字符，保留路径中的大小写，例如 `se
 
 ## 本轮验证
 
+2026-11-17 增加代码管理的样式注册表、Tailwind 边界与自动验证；持久化的 Theme v2 仍为原有 86 个 tokens，无数据库或导入格式升级。完整检查通过：Biome 13 组能力探针、lint 与格式检查、120 项测试／1502 个断言、严格 TypeScript、生产构建及 CSS 检查；隔离数据库的 7 组浏览器场景通过。构建仍有既有的主包超过 500 kB 提示。具体开发约束如下。
+
+### 代码管理的工作台与结构 tokens
+
+`src/lib/style-tokens.ts` 管理固定工作台颜色、间距、字号、圆角、尺寸、状态透明度、描边、层级、阴影和必要的组件结构尺寸。原始值集中于 primitive，CSS recipe 只消费 semantic 或 component。它遵循 DTCG 类型与引用组织，但属于独立的代码 profile，可使用 px、number 和专用扩展，不能作为用户主题导入。
+
+工作台采用有限尺度；三栏编辑器、CMS 主题面板等关键布局尺寸使用明确的组件角色，避免将所有宽度机械归入间距尺度。页面颜色、字体等可编辑值继续来自 `tokens.ts`，固定工作台保持自己的外观。`themeToStyle()` 只在画布和页面主题作用域注入受校验的主题；根节点由 `applyRootTheme()` 初始化默认主题。
+
+```sh
+bun run tokens:generate # 修改注册表后生成 src/style-tokens.css
+bun run tokens:check    # 校验生成文件与注册表一致，不写入文件
+```
+
+`src/style-tokens.css` 必须随注册表提交，不手工修改。新增设计值时先复用现有角色；确需扩展时在注册表定义 primitive 和语义/组件引用，再生成 CSS。
+
+### Tailwind 与 CSS 的使用边界
+
+生成的 `@theme` 通过 `--*: initial` 清空默认主题，不定义通用 `--spacing`，避免重新开放无限数字间距。`@theme inline` 仅映射受控语义变量，例如 `bg-action`、`text-body`、`text-muted`、`p-md` 和 `rounded-control`。结构工具如 `flex`、`grid`、`hidden`、`w-full` 仍可使用。`cn()` 同步注册自定义主题组，确保 `text-body text-muted` 同时保留，而冲突的 `p-md p-lg` 正确合并。
+
+Tailwind 只扫描应用源码，排除测试及验证脚本。生产 CSS 检查会拒绝非法探针类泄漏或未展开的命名查询。不要使用默认色板、任意值、未知类名、动态字符串拼接、CSS 变量快捷语法或临时透明度修饰符。组件状态采用已注册的完整类名和角色 tokens。
+
+CSS 的 viewport 与 container 断点分开注册和编译：
+
+```css
+@media (--viewport-editor) {
+  /* 使用编辑器的视口断点 */
+}
+@container (--container-compact) {
+  /* 容器小于 560px 时的布局 */
+}
+```
+
+Tailwind 对应的已开放命名空间为 `vp-sm:` 与 `@content:`。媒体查询不使用运行时 CSS 变量；生成器和 PostCSS 把注册名称展开为静态数值，未知名称、原始查询尺寸及混用命名空间均被检查拒绝。减少动态效果的 `prefers-reduced-motion` 是明确允许的系统偏好查询。
+
+运行时几何数据只允许通过 `src/lib/runtime-styles.ts` 的 helper 写入五个受控自定义属性：画布宽、高、缩放，图层深度，以及预设色板颜色。前四项验证有限非负数，图层深度还须为整数；色板值只取已注册预设。它们不进入页面 JSON，也不是实例视觉定制入口。
+
+Biome 的实际能力与补充 AST 检查分工见 [lint-coverage.md](lint-coverage.md)。`bun run check` 执行规则覆盖探针、lint、格式、全部测试和生产构建。构建后的 `bun run verify:browser` 使用临时数据库核对所有 catalog 组件、390/768/1440px 页面、559/560px 容器边界、主题草稿/发布隔离、编辑器缩放、主题作用域及弹层焦点。
+
+### 既有主题迁移验证
+
 2026-11-13 的模型、组件和 API 测试及 TypeScript／生产构建通过；生产构建仍提示主包较大。导出的 DTCG 文件通过官方 2025.10 JSON Schema 的独立验证，非法值对照被拒绝。
 
 隔离数据库的浏览器验证确认：保存主题草稿不影响公开页，发布后按钮配色与正文字号同步更新；主题面板下载的 DTCG 文件可以重新解析。现有数据库在备份后完成 v2 迁移，页面数据和网站元数据保持不变，草稿与发布主题分别按旧值转换，未发布首页没有被迁移操作自动发布。

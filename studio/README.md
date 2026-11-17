@@ -20,9 +20,15 @@ bun run dev
 
 ```sh
 bun test          # 模型、组件交互与后台 API 测试
-bun run build     # TypeScript 检查，然后生成 dist/
+bun run lint      # Biome 与设计系统专项检查
+bun run format    # 统一格式
+bun run check     # 规则覆盖探针、lint、格式检查、测试与构建
+bun run build     # 生成 token 一致性、TypeScript、构建及生产 CSS 检查
+bun run verify:browser # 构建后，用临时数据库验证浏览器场景
 bun start         # Bun API + dist/，默认 3001 端口
 ```
+
+Biome 和 Tailwind 的版本均固定。规则的实际覆盖、补充检查及例外见 [docs/lint-coverage.md](docs/lint-coverage.md)。CI 执行完整检查与浏览器验证；本地浏览器验证默认使用 macOS 的 Google Chrome，也可通过 `CHROME_PATH` 指定，其他平台先运行 `bunx --no-install playwright-core install chromium`。截图和结果写入未跟踪的 `.reports/browser/`，不接触现有网站数据库。
 
 ## 使用方式
 
@@ -86,6 +92,8 @@ DTCG 导入采用项目受控 profile，不接受任意 token、任意 CSS 字�
 
 编辑器自身的工具栏、侧栏与选中框属于固定工作台外观，不随被设计页面的主题一起修改。画布中的主题通过局部 CSS 变量作用域隔离。
 
+固定工作台与组件结构尺寸由 `src/lib/style-tokens.ts` 中另一套代码管理的 tokens 控制，不扩展可导入、持久化的 86-token Theme v2。修改后执行 `bun run tokens:generate`；开发启动也会生成，生产构建会拒绝过期产物。Tailwind 清空默认主题，只开放注册的语义类与结构类；CSS 使用受控变量及分别注册的 viewport/container 断点。
+
 ## 源码边界
 
 | 文件 | 职责 |
@@ -94,6 +102,10 @@ DTCG 导入采用项目受控 profile，不接受任意 token、任意 CSS 字�
 | `src/lib/catalog.ts` | 11 种组件的严格 Zod 属性、编辑器元数据，以及真正的 `@json-render/core` catalog |
 | `src/lib/document.ts` | 文档格式、初始示例、不可变树操作、导入验证与结构限制 |
 | `src/lib/tokens.ts` | DTCG 路径／类型白名单、分层引用、主题解析、旧主题迁移及导出 |
+| `src/lib/style-tokens.ts` | 代码管理的工作台 tokens、固定结构尺寸、Tailwind 语义映射与响应式注册表 |
+| `src/style-tokens.css` | 生成的变量、Tailwind 主题和断点；禁止手工编辑 |
+| `src/lib/runtime-styles.ts` | 受控的画布尺寸、缩放、图层深度及预设色板预览 |
+| `scripts/check-design.ts` | AST 样式策略检查与真实 Tailwind 类名验证 |
 | `src/lib/use-document.ts` | 撤销/重做、本地自动保存与恢复 |
 | `src/lib/cms.ts` | 后台 API 类型、请求与页面状态 |
 | `src/lib/routes.ts` | 主站与后台路由、首页映射、旧链接规范化及保留地址 |
@@ -118,7 +130,7 @@ DTCG 导入采用项目受控 profile，不接受任意 token、任意 CSS 字�
 1. 在 `catalog.ts` 添加 `.strict()` 的属性 schema、组件元数据与 catalog 条目。仅开放业务内容、结构参数或明确的语义变体，继续禁止任意 CSS 属性。
 2. 在 `CanvasRenderer.tsx` 的 registry 中实现组件，复用本地基础组件、React Aria 与全局语义 tokens，显式映射白名单 props。不要向组件透传未验证的属性、事件或 render props。若是容器，同步声明 catalog slot、元数据 `container` 与渲染器容器集合。
 3. 让组件默认值通过 schema 校验；补充必要的模型测试。新增格式若影响已保存项目，应提供文档版本迁移，而不是绕过导入校验。
-4. 执行 `bun test` 和 `bun run build`，再检查画布拖放、内容编辑、三种预览宽度及亮暗主题。
+4. 执行 `bun run check` 和 `bun run verify:browser`，再按改动范围检查画布拖放、内容编辑及新增交互。
 
 ## 部署与当前范围
 

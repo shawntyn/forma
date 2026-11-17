@@ -2,8 +2,11 @@
 export const HOME_SLUG = 'home';
 export const RESERVED_PAGE_SLUGS = ['admin', 'api', 'local', 'assets', 'p'] as const;
 export function isPageSlug(slug: string): boolean {
-  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && slug.length <= 80 &&
-    !(RESERVED_PAGE_SLUGS as readonly string[]).includes(slug);
+  return (
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) &&
+    slug.length <= 80 &&
+    !(RESERVED_PAGE_SLUGS as readonly string[]).includes(slug)
+  );
 }
 export function publicPagePath(slug: string): string {
   return slug === HOME_SLUG ? '/' : `/${encodeURIComponent(slug)}`;
@@ -21,7 +24,9 @@ export function resolveSiteRoute(pathname: string): SiteRoute {
   if (legacy && isPageSlug(legacy[1])) return { kind: 'redirect', path: publicPagePath(legacy[1]) };
   if (path !== pathname) {
     const normalized = resolveSiteRoute(path);
-    return normalized.kind === 'not-found' ? normalized : { kind: 'redirect', path: normalized.kind === 'redirect' ? normalized.path : path };
+    return normalized.kind === 'not-found'
+      ? normalized
+      : { kind: 'redirect', path: normalized.kind === 'redirect' ? normalized.path : path };
   }
   if (path === '/admin' || path.startsWith('/admin/')) return { kind: 'admin' };
   if (path === '/local') return { kind: 'local' };

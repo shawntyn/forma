@@ -4,10 +4,19 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bun scripts/dev.ts",
-    "dev:editor": "bun --bun vite --host 127.0.0.1",
-    "build": "tsc -b && bun --bun vite build",
+    "dev": "bun run tokens:generate && bun scripts/dev.ts",
+    "dev:editor": "bun run tokens:generate && bun --bun vite --host 127.0.0.1",
+    "build": "bun run tokens:check && tsc -b && bun --bun vite build && bun scripts/verify-style-build.ts",
     "preview": "bun --bun vite preview --host 127.0.0.1",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint . && bun run lint:design",
+    "lint:design": "bun scripts/check-design.ts",
+    "verify:biome": "bun scripts/verify-biome.ts",
+    "verify:browser": "bun scripts/verify-browser.ts",
+    "tokens:generate": "bun scripts/generate-style-tokens.ts",
+    "tokens:check": "bun scripts/generate-style-tokens.ts --check",
+    "check": "bun run verify:biome && bun run lint && bun run format:check && bun test && bun run build",
     "test": "bun test",
     "start": "bun server/index.ts"
   },
@@ -23,6 +32,8 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@babel/parser": "7.28.5",
+    "@biomejs/biome": "2.6.8",
     "@tailwindcss/vite": "4.3.5",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.10",
@@ -31,6 +42,10 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.3.0",
     "happy-dom": "21.0.4",
+    "playwright-core": "1.65.1",
+    "postcss": "8.5.32",
+    "postcss-selector-parser": "7.2.1",
+    "postcss-value-parser": "4.2.0",
     "tailwindcss": "4.3.5",
     "typescript": "7.0.2",
     "vite": "8.3.8"

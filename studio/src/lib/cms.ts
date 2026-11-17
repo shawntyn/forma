@@ -1,29 +1,67 @@
 import type { DesignDocument, DesignSpec } from './document';
 import type { Theme } from './tokens';
 
-export interface CmsUser { id: string; name: string; email: string; createdAt: string }
-export interface CmsSession { user: CmsUser | null; needsSetup: boolean }
-export interface CmsSite { name: string; theme: Theme; themeRevision: number; publishedThemeRevision: number; updatedAt: string }
+export interface CmsUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+export interface CmsSession {
+  user: CmsUser | null;
+  needsSetup: boolean;
+}
+export interface CmsSite {
+  name: string;
+  theme: Theme;
+  themeRevision: number;
+  publishedThemeRevision: number;
+  updatedAt: string;
+}
 export interface CmsPageSummary {
-  id: string; title: string; slug: string; revision: number;
-  publishedRevision: number | null; publishedSlug: string | null;
-  createdAt: string; updatedAt: string; publishedAt: string | null;
-  updatedBy: string; archived: boolean;
+  id: string;
+  title: string;
+  slug: string;
+  revision: number;
+  publishedRevision: number | null;
+  publishedSlug: string | null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  updatedBy: string;
+  archived: boolean;
 }
-export interface CmsPage extends CmsPageSummary { spec: DesignSpec }
-export interface CmsPublicPage { document: DesignDocument; publishedAt: string }
+export interface CmsPage extends CmsPageSummary {
+  spec: DesignSpec;
+}
+export interface CmsPublicPage {
+  document: DesignDocument;
+  publishedAt: string;
+}
 export class ApiError extends Error {
-  constructor(message: string, public status: number) { super(message); this.name = 'ApiError'; }
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
 }
-export async function api<T>(path: string, options: { method?: string; body?: unknown; signal?: AbortSignal } = {}): Promise<T> {
+export async function api<T>(
+  path: string,
+  options: { method?: string; body?: unknown; signal?: AbortSignal } = {},
+): Promise<T> {
   const response = await fetch(`/api${path}`, {
-    method: options.method ?? 'GET', credentials: 'same-origin', signal: options.signal,
+    method: options.method ?? 'GET',
+    credentials: 'same-origin',
+    signal: options.signal,
     headers: { 'Content-Type': 'application/json', 'X-Forma-Request': '1' },
     ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
   });
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    if (response.status === 401 && typeof window !== 'undefined' && !path.startsWith('/auth/')) window.dispatchEvent(new Event('forma:unauthorized'));
+    if (response.status === 401 && typeof window !== 'undefined' && !path.startsWith('/auth/'))
+      window.dispatchEvent(new Event('forma:unauthorized'));
     throw new ApiError(data?.error ?? `请求失败（${response.status}）`, response.status);
   }
   return data as T;
